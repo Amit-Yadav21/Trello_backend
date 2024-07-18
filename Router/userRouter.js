@@ -5,13 +5,12 @@ import { verifyToken } from '../Midlewere/authentication.js';
 
 const router = express.Router();
 
-// login/Signup router
-router.post('/register/user', userControllers.signup);
-router.post('/login/user', userControllers.login);
-router.get('/get/signup/user', userControllers.getAllUsers);
-router.get('/login/user/data', verifyToken, userControllers.GetLoginData);
-router.put('/update/login/userByEmail', verifyToken, userControllers.UpdateLoginData);
-router.delete('/delete/login/userByEmail',verifyToken , userControllers.DeleteUserData);
-router.post('/logout/login/userData', verifyToken, userControllers.logout);
+router.post('/register', userControllers.signup);
+router.post('/login', userControllers.login);
+router.get('/find/all/signup/data', userControllers.getAllUsers);
+router.get('/find/log/In/data', verifyToken, userControllers.GetLoginData);
+router.put('/update/log/In/data/By/Email', verifyToken, userControllers.UpdateLoginData);
+router.delete('/delete/log/In/data/By/Email',verifyToken , userControllers.DeleteUserData);
+router.post('/logout/log/In/data', verifyToken, userControllers.logout);
 
 export default router;

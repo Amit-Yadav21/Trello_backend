@@ -13,7 +13,7 @@ const port = process.env.PORT
 app.use(express.json())
 app.use(cookieParser())
 
-app.use('/', userRouter);
+app.use('/user', userRouter);
 app.use('/project', projectRouter)
 app.use('/task', taskRouter)
 app.use('/', taskBoardRouter)

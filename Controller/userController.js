@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import { Register } from '../Models/userSchema.js';
 import { createToken } from '../Midlewere/authentication.js';
 
+// Register function
 const signup = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -32,7 +33,7 @@ const signup = async (req, res) => {
 };
 
 
-// Login user 
+// Login function
 const login = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -57,7 +58,7 @@ const login = async (req, res) => {
     }
 };
 
-// Get all signup data
+// Get all signup data function
 const getAllUsers = async (req, res) => {
     try {
         const users = await Register.find({});
@@ -68,7 +69,7 @@ const getAllUsers = async (req, res) => {
     }
 };
 
-// Get login data
+// Get login data function
 const GetLoginData = async (req, res) => {
     try {
         // Assuming req.user is set by authentication middleware
@@ -87,7 +88,7 @@ const GetLoginData = async (req, res) => {
     }
 };
 
-// Update an item
+// update function
 const UpdateLoginData = async (req, res) => {
     const { email, password } = req.body;
     try {
@@ -106,7 +107,7 @@ const UpdateLoginData = async (req, res) => {
     }
 };
 
-// Delete an item
+// Delete function
 const DeleteUserData = async (req, res) => {
     const { email } = req.body; 
     try {
