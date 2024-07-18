@@ -60,4 +60,38 @@ const findSingleTask = async (req, res) => {
     }
 };
 
-export { createTask, findAllTask, findSingleTask };
+const updateTask = async (req, res) => {
+    const { taskName, newName, description, status, tags, project } = req.body;
+    const { email } = req.user;
+
+    try {
+        const checkTasks = await Task.find({ project, assignedUser: email });
+        if (!checkTasks || checkTasks.length === 0) {
+            return res.status(404).json({ error: "Project and assigned user not available." });
+        }
+        
+        const task = await Task.findOne({ project, assignedUser: email });
+        if (!task) {
+            return res.status(404).json({ error: "Task not found." });
+        }
+
+        const updatedTask = await Task.findOneAndUpdate(
+            { assignedUser: email },
+            {
+                taskName: newName || taskName,
+                description: description || task.description,
+                status: status || task.status,
+                tags: tags || task.tags,
+                project: project || task.project
+            },
+            { new: true }
+        );
+
+        res.status(200).json({ message: "Task updated successfully", task: updatedTask });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to update task" });
+    }
+};
+
+export { createTask, findAllTask, findSingleTask, updateTask };
