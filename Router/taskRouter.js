@@ -1,14 +1,13 @@
 import express from 'express';
-import { createNewTask, findAllTask, findTaskByAssignedUser, findTasksByStatus, updateTaskByProjectName, deleteTaskByProjectName } from '../Controller/taskController.js';
+import { createNewTask, findAllTask, findTaskByAssignedUser, updateTaskByProjectName, deleteTaskByProjectName } from '../Controller/taskController.js';
 import { verifyToken } from '../Midlewere/authentication.js';
 
 const router = express.Router();
 
-router.post('/task/create', verifyToken, createNewTask);
-router.get('/task/findAllTask', findAllTask);
-router.get('/task/findTaskByAssignedUser', verifyToken, findTaskByAssignedUser);
-router.get('/task/findTasksByStatus', findTasksByStatus);
-router.put('/task/updateTask', verifyToken, updateTaskByProjectName);
-router.delete('/task/deleteTask', verifyToken, deleteTaskByProjectName);
+router.post('/create', verifyToken, createNewTask);
+router.get('/find/all', findAllTask);
+router.get('/find/task/By/AssignedUser', verifyToken, findTaskByAssignedUser);
+router.put('/update', verifyToken, updateTaskByProjectName);
+router.delete('/delete', verifyToken, deleteTaskByProjectName);
 
 export default router;

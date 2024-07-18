@@ -72,27 +72,6 @@ const findTaskByAssignedUser = async (req, res) => {
     }
 };
 
-const findTasksByStatus = async (req, res) => {
-    try {
-        const tasks = await Task.find({});
-        const groupedTasks = {
-            Backlog: [],
-            InDiscussion: [],
-            InProgress: [],
-            Done: []
-        };
-
-        tasks.forEach(task => {
-            groupedTasks[task.status.replace(' ', '')].push(task);
-        });
-
-        res.status(200).json({ message: "Tasks grouped by status fetched successfully", tasks: groupedTasks });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Failed to fetch tasks by status" });
-    }
-};
-
 const updateTaskByProjectName = async (req, res) => {
     const { taskName, newName, description, status, tags, project } = req.body;
     const { email } = req.user;
@@ -143,4 +122,4 @@ const deleteTaskByProjectName = async (req, res) => {
     }
 };
 
-export { createNewTask, findAllTask, findTaskByAssignedUser, findTasksByStatus, updateTaskByProjectName, deleteTaskByProjectName };
+export { createNewTask, findAllTask, findTaskByAssignedUser, updateTaskByProjectName, deleteTaskByProjectName };

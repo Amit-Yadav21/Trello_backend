@@ -15,7 +15,7 @@ app.use(cookieParser())
 
 app.use('/', userRouter);
 app.use('/', projectRouter)
-app.use('/', taskRouter)
+app.use('/task', taskRouter)
 app.use('/', taskBoardRouter)
 
 // connect momgoDB campass Backend API
