@@ -35,4 +35,14 @@ const createTask = async (req, res) => {
     }
 };
 
-export { createTask };
+const findAllTask = async (req, res) => {
+    try {
+        const tasks = await Task.find();
+        res.status(200).json({ message: "All Task find successfully", tasks});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch tasks by email" });
+    }
+};
+
+export { createTask, findAllTask };
