@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import userRouter from './Router/userRouter.js';
+import projectRouter from './Router/projectRouter.js'
 import 'dotenv/config'
 
 const app = express();
@@ -11,6 +12,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/', userRouter);
+app.use('/', projectRouter)
 
 // connect momgoDB campass Backend API
 mongoose.connect(process.env.Connect)

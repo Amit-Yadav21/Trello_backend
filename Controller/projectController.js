@@ -1,10 +1,10 @@
-import Project from '../models/Project.js';
+import { Project } from '../Models/projectSchema.js';
 
 // Get Logged-in User's Projects
 const getProjects = async (req, res) => {
   try {
     const projects = await Project.find({ user: req.user.email });
-    res.status(200).json({message:"Project find successfully.", project : projects});
+    res.status(200).json({ message: "Project find successfully.", project: projects });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -13,9 +13,15 @@ const getProjects = async (req, res) => {
 // Create a New Project for Logged-in User
 const createProject = async (req, res) => {
   const { name, description } = req.body;
+  const { email } = req.user;
 
-  if (!name) {
-    return res.status(400).json({ message: 'Project name is required' });
+  if (!name || !description) {
+    return res.status(400).json({ message: 'Project name, description are required' });
+  }
+
+  const existingProject = await Project.findOne({ name, user: email });
+  if (existingProject) {
+    return res.status(404).json({ message: "Project already exist..." });
   }
 
   try {
@@ -23,11 +29,10 @@ const createProject = async (req, res) => {
       name,
       description,
       user: req.user.email,
-      status: 'active'
     });
 
     await project.save();
-    res.status(200).json({message:"Project ceated successfully.", project : project});
+    res.status(200).json({ message: "Project ceated successfully.", project: project });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -35,47 +40,52 @@ const createProject = async (req, res) => {
 
 // Update Logged-in User's Project
 const updateProject = async (req, res) => {
-    const { name, newName, description } = req.body;
-    const { email } = req.user;
+  const { name, newName, description, status } = req.body;
+  const { email } = req.user;
 
-    try {
-        const updateProject = await Project.findOneAndUpdate(
-            { name, email },
-            {
-                name: newName || name,
-                description: description || updateProject.description
-            },
-            { new: true }
-        );
-        if (!updateProject) {
-            return res.status(404).json({ message: "Project not found" });
-        }
-        res.status(200).json({message:"Project updated successfully.", updateProject });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Something went wrong while updating the project." });
+  try {
+    const existingProject = await Project.findOne({ name, user: email });
+    if (!existingProject) {
+      return res.status(404).json({ message: "Project not found" });
     }
+
+    const updatedProject = await Project.findOneAndUpdate(
+      { name, user: email },
+      {
+        name: newName || existingProject.name,
+        description: description || existingProject.description,
+        status: status || existingProject.status
+      },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "Project updated successfully.", updatedProject });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong while updating the project." });
+  }
 }
 
 // Change Status of Logged-in User's Project
 const changeProjectStatus = async (req, res) => {
-    const { name } = req.body;
-    const { email } = req.user;
+  const { name, status } = req.body;
+  const { email } = req.user;
 
-    try {
-        const projectStatus = await Project.findOneAndUpdate(
-            { name, email },
-            { status: 'canceled' },
-            { new: true }
-        );
-        if (!projectStatus) {
-            return res.status(404).json({ message: "projectStatus not found" });
-        }
-        res.status(200).json({ projectStatus });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Something went wrong while canceling the projectStatus." });
+  try {
+    // Check if the project exists
+    const project = await Project.findOne({ name, user: email });
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
     }
+    // Update the project status
+    project.status = status;
+    await project.save();
+
+    res.status(200).json({ message: "Project status updated successfully", project });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong while canceling the projectStatus." });
+  }
 };
 
 
