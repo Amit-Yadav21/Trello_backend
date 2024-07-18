@@ -7,8 +7,8 @@ const createTask = async (req, res) => {
 
     try {
         // Check if assigned user exists
-        const userExists = await Task.findOne({taskName, project ,  assignedUser:req.user.email });
-        if (userExists) {
+        const taskExists = await Task.findOne({taskName, project ,  assignedUser:req.user.email });
+        if (taskExists) {
             return res.status(400).json({ message: `Task already assigned this user :- ${email}` });
         }
 
@@ -45,4 +45,16 @@ const findAllTask = async (req, res) => {
     }
 };
 
-export { createTask, findAllTask };
+const findSingleTask = async (req, res) => {
+    const { project } = req.body;
+    const { email } = req.user;
+    try {
+        const tasks = await Task.find({project, assignedUser: email });
+        res.status(200).json(tasks);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch tasks by email" });
+    }
+};
+
+export { createTask, findAllTask, findSingleTask };
