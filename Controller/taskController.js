@@ -83,8 +83,8 @@ const updateTaskByProjectName = async (req, res) => {
         }
 
         const task = await Task.findOne({ project, assignedUser: email });
-        if (!task) {
-            return res.status(404).json({ error: "Task not found." });
+        if (task) {
+            return res.status(200).json({ message: `Project name and assignedUser :- ${email}, already Exist...` });
         }
 
         const updatedTask = await Task.findOneAndUpdate(
