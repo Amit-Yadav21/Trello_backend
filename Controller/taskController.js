@@ -69,7 +69,7 @@ const updateTask = async (req, res) => {
         if (!checkTasks || checkTasks.length === 0) {
             return res.status(404).json({ error: "Project and assigned user not available." });
         }
-        
+
         const task = await Task.findOne({ project, assignedUser: email });
         if (!task) {
             return res.status(404).json({ error: "Task not found." });
@@ -94,4 +94,21 @@ const updateTask = async (req, res) => {
     }
 };
 
-export { createTask, findAllTask, findSingleTask, updateTask };
+const deleteTaskByProjectName = async (req, res) => {
+    const { project } = req.body;
+
+
+    try {
+        const deletedTask = await Task.findOneAndDelete({ project: project });
+
+        if (!deletedTask || deletedTask.length === 0) {
+            return res.status(404).json({ message: "No tasks found to delete" });
+        }
+        res.status(200).json({ message: "Tasks deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to delete tasks" });
+    }
+};
+
+export { createTask, findAllTask, findSingleTask, updateTask, deleteTaskByProjectName };
