@@ -4,9 +4,9 @@ import { verifyToken } from '../Midlewere/authentication.js';
 
 const router = express.Router();
 
-router.get('/project/get', verifyToken, getProjects);
-router.post('/project/create', verifyToken, createProject);
-router.put('/project/update', verifyToken, updateProject);
-router.patch('/project/changeStatus', verifyToken, changeProjectStatus);
+router.get('/get', verifyToken, getProjects);
+router.post('/create', verifyToken, createProject);
+router.put('/update', verifyToken, updateProject);
+router.patch('/change/status', verifyToken, changeProjectStatus);
 
 export default router;

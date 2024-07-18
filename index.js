@@ -14,7 +14,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.use('/', userRouter);
-app.use('/', projectRouter)
+app.use('/project', projectRouter)
 app.use('/task', taskRouter)
 app.use('/', taskBoardRouter)
 
