@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const taskSchema = new Schema({
-  name: { type: String, required: true },
+  taskName: { type: String, required: true },
   description: { type: String },
   status: { type: String, enum: ['Backlog', 'In Discussion', 'In Progress', 'Done'], default: 'Backlog' },
   tags: [{ type: String }],
