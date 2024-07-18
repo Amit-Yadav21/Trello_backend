@@ -1,9 +1,10 @@
 import express from 'express';
-import { getProjects, createProject, updateProject, changeProjectStatus } from '../Controller/projectController.js';
+import { getAllProjects, getProjects, createProject, updateProject, changeProjectStatus } from '../Controller/projectController.js';
 import { verifyToken } from '../Midlewere/authentication.js';
 
 const router = express.Router();
 
+router.get('/get/all', getAllProjects);
 router.get('/get', verifyToken, getProjects);
 router.post('/create', verifyToken, createProject);
 router.put('/update', verifyToken, updateProject);

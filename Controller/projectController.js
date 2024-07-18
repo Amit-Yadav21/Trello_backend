@@ -1,5 +1,15 @@
 import { Project } from '../Models/projectSchema.js';
 
+// Get All Projects
+const getAllProjects = async (req, res) => {
+  try {
+    const projects = await Project.find({});
+    res.status(200).json({ message: "find all Project successfully.", project: projects });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get Logged-in User's Projects
 const getProjects = async (req, res) => {
   try {
@@ -12,21 +22,21 @@ const getProjects = async (req, res) => {
 
 // Create a New Project for Logged-in User
 const createProject = async (req, res) => {
-  const { name, description } = req.body;
+  const { projectName, description } = req.body;
   const { email } = req.user;
 
-  if (!name || !description) {
-    return res.status(400).json({ message: 'Project name, description are required' });
+  if (!projectName || !description) {
+    return res.status(400).json({ message: 'project Name, description are required' });
   }
 
-  const existingProject = await Project.findOne({ name, user: email });
+  const existingProject = await Project.findOne({ projectName, user: email });
   if (existingProject) {
     return res.status(404).json({ message: "Project already exist..." });
   }
 
   try {
     const project = new Project({
-      name,
+      projectName,
       description,
       user: req.user.email,
     });
@@ -40,19 +50,19 @@ const createProject = async (req, res) => {
 
 // Update Logged-in User's Project
 const updateProject = async (req, res) => {
-  const { name, newName, description, status } = req.body;
+  const { projectName, newName, description, status } = req.body;
   const { email } = req.user;
 
   try {
-    const existingProject = await Project.findOne({ name, user: email });
+    const existingProject = await Project.findOne({ projectName, user: email });
     if (!existingProject) {
       return res.status(404).json({ message: "Project not found" });
     }
 
     const updatedProject = await Project.findOneAndUpdate(
-      { name, user: email },
+      { projectName, user: email },
       {
-        name: newName || existingProject.name,
+        projectName: newName || existingProject.projectName,
         description: description || existingProject.description,
         status: status || existingProject.status
       },
@@ -68,12 +78,12 @@ const updateProject = async (req, res) => {
 
 // Change Status of Logged-in User's Project
 const changeProjectStatus = async (req, res) => {
-  const { name, status } = req.body;
+  const { projectName, status } = req.body;
   const { email } = req.user;
 
   try {
     // Check if the project exists
-    const project = await Project.findOne({ name, user: email });
+    const project = await Project.findOne({ projectName, user: email });
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
@@ -89,4 +99,4 @@ const changeProjectStatus = async (req, res) => {
 };
 
 
-export { getProjects, createProject, updateProject, changeProjectStatus };
+export { getAllProjects, getProjects, createProject, updateProject, changeProjectStatus };
