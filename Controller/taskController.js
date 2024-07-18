@@ -1,8 +1,8 @@
 import { Task } from '../Models/taskSchema.js';
 import { Project } from '../Models/projectSchema.js';
 
-const createTask = async (req, res) => {
-    const { taskName, description, status, tags, project } = req.body;
+const createNewTask = async (req, res) => {
+    const { taskName, description, status, tags, dueDate, project } = req.body;
     const { email } = req.user;
 
     try {
@@ -23,6 +23,7 @@ const createTask = async (req, res) => {
             description,
             status,
             tags,
+            dueDate,
             assignedUser: email,
             project: projectExists.name
         });
@@ -37,7 +38,7 @@ const createTask = async (req, res) => {
 
 const findAllTask = async (req, res) => {
     try {
-        const tasks = await Task.find();
+        const tasks = await Task.find({});
         res.status(200).json({ message: "All Task find successfully", tasks });
     } catch (error) {
         console.error(error);
@@ -45,22 +46,54 @@ const findAllTask = async (req, res) => {
     }
 };
 
-const findSingleTask = async (req, res) => {
-    const { project } = req.body;
-    const { email } = req.user;
+const findTaskByAssignedUser = async (req, res) => {
     try {
-        const tasks = await Task.find({ project, assignedUser: email });
+        const tasks = await Task.find({ assignedUser: req.user.email });
         if (!tasks || tasks.length === 0) {
-            return res.status(404).json({ error: "Task not available." });
+            return res.status(401).json({ message: "No tasks found for the assigned user" });
         }
-        res.status(200).json(tasks);
+
+        const groupedTasks = {
+            Backlog: [],
+            InDiscussion: [],
+            InProgress: [],
+            Done: []
+        };
+
+        tasks.forEach(task => {
+            groupedTasks[task.status.replace(' ', '')].push(task);
+        });
+
+        res.status(200).json({ message: "Tasks grouped by status fetched successfully", tasks: groupedTasks });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to fetch tasks by email" });
+        res.status(500).json({ error: "Something went wrong while fetching the tasks" });
     }
 };
 
-const updateTask = async (req, res) => {
+const findTasksByStatus = async (req, res) => {
+    try {
+        const tasks = await Task.find({});
+        const groupedTasks = {
+            Backlog: [],
+            InDiscussion: [],
+            InProgress: [],
+            Done: []
+        };
+
+        tasks.forEach(task => {
+            groupedTasks[task.status.replace(' ', '')].push(task);
+        });
+
+        res.status(200).json({ message: "Tasks grouped by status fetched successfully", tasks: groupedTasks });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch tasks by status" });
+    }
+};
+
+const updateTaskByProjectName = async (req, res) => {
     const { taskName, newName, description, status, tags, project } = req.body;
     const { email } = req.user;
 
@@ -97,7 +130,6 @@ const updateTask = async (req, res) => {
 const deleteTaskByProjectName = async (req, res) => {
     const { project } = req.body;
 
-
     try {
         const deletedTask = await Task.findOneAndDelete({ project: project });
 
@@ -111,4 +143,4 @@ const deleteTaskByProjectName = async (req, res) => {
     }
 };
 
-export { createTask, findAllTask, findSingleTask, updateTask, deleteTaskByProjectName };
+export { createNewTask, findAllTask, findTaskByAssignedUser, findTasksByStatus, updateTaskByProjectName, deleteTaskByProjectName };
