@@ -1,12 +1,24 @@
 import bcrypt from 'bcrypt';
 import { Register } from '../Models/userSchema.js';
 import { createToken } from '../middleware/authentication.js';
+import { validationResult } from 'express-validator';
+
 
 // Register function
 const signup = async (req, res, next) => {
     const { name, email, password } = req.body;
 
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const formattedErrors = errors.array().map(error => ({
+                value: error.value,
+                field: error.path,
+                msg: error.msg
+            }));
+            return res.status(400).json({ errors: formattedErrors });
+        }
+
         // Check if user already exists
         let user = await Register.findOne({ email });
         if (user) {
@@ -41,6 +53,16 @@ const signup = async (req, res, next) => {
 const login = async (req, res, next) => {
     const { email, password } = req.body;
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const formattedErrors = errors.array().map(error => ({
+                value: error.value,
+                field: error.path,
+                msg: error.msg
+            }));
+            return res.status(400).json({ errors: formattedErrors });
+        }
+
         // Check if user exists
         let user = await Register.findOne({ email });
         if (!user) {
@@ -110,6 +132,16 @@ const GetLoginData = async (req, res, next) => {
 const UpdateLoginData = async (req, res, next) => {
     const { email, password } = req.body;
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const formattedErrors = errors.array().map(error => ({
+                value: error.value,
+                field: error.path,
+                msg: error.msg
+            }));
+            return res.status(400).json({ errors: formattedErrors });
+        }
+
         const updatedItem = await Register.findOne({ email });
         if (!updatedItem) {
             const err = new Error("User not found. Please check information.")

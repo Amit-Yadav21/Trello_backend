@@ -1,11 +1,23 @@
 import { Task } from '../Models/taskSchema.js';
 import { Project } from '../Models/projectSchema.js';
+import { validationResult } from 'express-validator';
 
 const createNewTask = async (req, res, next) => {
     const { taskName, description, status, tags, dueDate, project } = req.body;
     const { email } = req.user;
 
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const formattedErrors = errors.array().map(error => ({
+                value: error.value,
+                field: error.path,
+                msg: error.msg
+            }));
+            return res.status(400).json({ errors: formattedErrors });
+        }
+
+         
         // Check if assigned user exists
         const taskExists = await Task.findOne({ taskName, project, assignedUser: req.user.email });
         if (taskExists) {
@@ -112,6 +124,16 @@ const updateTaskByProjectName = async (req, res, next) => {
     const { email } = req.user;
 
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const formattedErrors = errors.array().map(error => ({
+                value: error.value,
+                field: error.path,
+                msg: error.msg
+            }));
+            return res.status(400).json({ errors: formattedErrors });
+        }
+
         const checkTasks = await Task.find({ project, assignedUser: email });
         if (!checkTasks || checkTasks.length === 0) {
             const err = new Error("Project and assigned user not available.")
@@ -151,6 +173,16 @@ const deleteTaskByProjectName = async (req, res, next) => {
     const { project } = req.body;
 
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            const formattedErrors = errors.array().map(error => ({
+                value: error.value,
+                field: error.path,
+                msg: error.msg
+            }));
+            return res.status(400).json({ errors: formattedErrors });
+        }
+
         const deletedTask = await Task.findOneAndDelete({ project: project });
 
         if (!deletedTask || deletedTask.length === 0) {

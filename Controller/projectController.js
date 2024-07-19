@@ -1,4 +1,5 @@
 import { Project } from '../Models/projectSchema.js';
+import { validationResult } from 'express-validator';
 
 // Get All Projects
 const getAllProjects = async (req, res, next) => {
@@ -29,11 +30,11 @@ const createProject = async (req, res, next) => {
   const { projectName, description } = req.body;
   const { email } = req.user;
 
-  if (!projectName || !description) {
-    const err = new Error("project Name, description are required")
-    err.status = 404;
-    return next(err)
-  }
+  // if (!projectName || !description) {
+  //   const err = new Error("project Name, description are required")
+  //   err.status = 404;
+  //   return next(err)
+  // }
 
   const existingProject = await Project.findOne({ projectName, user: email });
   if (existingProject) {
@@ -43,6 +44,16 @@ const createProject = async (req, res, next) => {
   }
 
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map(error => ({
+        value: error.value,
+        field: error.path,
+        msg: error.msg
+      }));
+      return res.status(400).json({ errors: formattedErrors });
+    }
+
     const project = new Project({
       projectName,
       description,
@@ -64,6 +75,16 @@ const updateProject = async (req, res, next) => {
   const { email } = req.user;
 
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map(error => ({
+        value: error.value,
+        field: error.path,
+        msg: error.msg
+      }));
+      return res.status(400).json({ errors: formattedErrors });
+    }
+
     const existingProject = await Project.findOne({ projectName, user: email });
     if (!existingProject) {
       const err = new Error("Project not found for updation")
@@ -96,6 +117,16 @@ const changeProjectStatus = async (req, res, next) => {
   const { email } = req.user;
 
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const formattedErrors = errors.array().map(error => ({
+        value: error.value,
+        field: error.path,
+        msg: error.msg
+      }));
+      return res.status(400).json({ errors: formattedErrors });
+    }
+
     // Check if the project exists
     const project = await Project.findOne({ projectName, user: email });
     if (!project) {
