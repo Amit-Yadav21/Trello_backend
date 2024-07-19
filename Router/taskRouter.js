@@ -1,5 +1,5 @@
 import express from 'express';
-import { createNewTask, findAllTask, findTaskByAssignedUser, updateTaskByProjectName, deleteTaskByProjectName } from '../Controller/taskController.js';
+import { createNewTask, findAllTask, findTaskByAssignedUser, findTasksByStatus, updateTaskByProjectName, deleteTaskByProjectName } from '../Controller/taskController.js';
 import { verifyToken } from '../middleware/authentication.js';
 
 const router = express.Router();
@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/create', verifyToken, createNewTask);
 router.get('/find/all', findAllTask);
 router.get('/find/task/By/AssignedUser', verifyToken, findTaskByAssignedUser);
+router.get('/find/task/By/Status', findTasksByStatus);
 router.put('/update', verifyToken, updateTaskByProjectName);
 router.delete('/delete', verifyToken, deleteTaskByProjectName);
 
