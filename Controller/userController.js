@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { Register } from '../Models/userSchema.js';
-import { createToken } from '../Midlewere/authentication.js';
+import { createToken } from '../middleware/authentication.js';
 
 // Register function
 const signup = async (req, res, next) => {
