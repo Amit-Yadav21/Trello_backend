@@ -5,6 +5,7 @@ import userRouter from './Router/userRouter.js';
 import projectRouter from './Router/projectRouter.js'
 import taskRouter from './Router/taskRouter.js'
 import taskBoardRouter from './Router/taskBoardRouter.js'
+import dashboardRouter from './Router/dashboardRouter.js'
 import logging from './middleware/logger.js';
 import errorHandler from './middleware/errorHandler.js';
 import notFoundHandler from './middleware/notFoundHandler.js';
@@ -26,6 +27,7 @@ app.use('/user', userRouter);
 app.use('/project', projectRouter)
 app.use('/task', taskRouter)
 app.use('/', taskBoardRouter)
+app.use('/', dashboardRouter)
 
 // notFound Handling Middleware
 app.use(notFoundHandler) 
