@@ -3,14 +3,16 @@ import { Register } from '../Models/userSchema.js';
 import { createToken } from '../Midlewere/authentication.js';
 
 // Register function
-const signup = async (req, res) => {
+const signup = async (req, res, next) => {
     const { name, email, password } = req.body;
 
     try {
         // Check if user already exists
         let user = await Register.findOne({ email });
         if (user) {
-            return res.status(400).json({ message: 'User already exists. Please Login!' });
+            const err = new Error("User already exists. Please Login!")
+            err.status = 400;
+            return next(err)
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -28,19 +30,23 @@ const signup = async (req, res) => {
         res.status(200).json({ message: "Signup successful", result });
     } catch (error) {
         console.error('Signup Error:', error);
-        res.status(500).json({ message: 'Server Error' });
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
 
 // Login function
-const login = async (req, res) => {
+const login = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         // Check if user exists
         let user = await Register.findOne({ email });
         if (!user) {
-            return res.status(400).json({ message: 'Invalid Email or Password. Please check..' });
+            const err = new Error("Invalid Email. Please check..")
+            err.status = 400;
+            return next(err)
         }
 
         // Check if password matches
@@ -50,51 +56,65 @@ const login = async (req, res) => {
             res.cookie('token', token)
             res.status(200).json({ message: "user login successfully..", user, token })
         } else {
-            return res.status(401).json({ message: 'invalid password..' });
+            const err = new Error("invalid password..")
+            err.status = 400;
+            return next(err)
         }
     } catch (error) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
 // Get all signup data function
-const getAllUsers = async (req, res) => {
+const getAllUsers = async (req, res, next) => {
     try {
         const users = await Register.find({});
         res.json(users);
     } catch (error) {
         console.error(error.message);
-        res.status(500).send('Server Error');
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
 // Get login data function
-const GetLoginData = async (req, res) => {
+const GetLoginData = async (req, res, next) => {
     try {
         // Assuming req.user is set by authentication middleware
         if (!req.user) {
-            return res.status(401).json({ message: 'Unauthorized' });
+            const err = new Error("Unauthorized")
+            err.status = 401;
+            return next(err)
         }
 
         const loginData = await Register.findOne({ email: req.user.email });
         if (!loginData) {
-            return res.status(404).json({ message: 'User not logedIn found' });
+            const err = new Error("User not logedIn found")
+            err.status = 404;
+            return next(err)
         }
         res.json(loginData);
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: error.message });
+        const err = new Error("server Error!")
+        err.status = 500;
+        return next(err)
     }
 };
 
 // update function
-const UpdateLoginData = async (req, res) => {
+const UpdateLoginData = async (req, res, next) => {
     const { email, password } = req.body;
     try {
         const updatedItem = await Register.findOne({ email });
         if (!updatedItem) {
-            return res.status(404).json({ message: 'user not found..' })
+            const err = new Error("User not found. Please check information.")
+            err.status = 404;
+            return next(err)
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -103,39 +123,46 @@ const UpdateLoginData = async (req, res) => {
         const updateData = await Register.findOneAndUpdate({ email }, { $set: submit }, { new: true })
         res.status(200).json({ message: "user update successfully...", updateData })
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        const err = new Error("Server Error !")
+        err.status = 500;
+        return next(err)
     }
 };
 
 // Delete function
-const DeleteUserData = async (req, res) => {
-    const { email } = req.body; 
+const DeleteUserData = async (req, res, next) => {
+    const { email } = req.body;
     try {
-        // Assuming 'Register' is your model or schema
         const deletedItem = await Register.findOneAndDelete({ email: email });
 
         if (!deletedItem) {
-            return res.status(404).json({ message: 'User data not found.' });
+            const err = new Error("User data not found.")
+            err.status = 404;
+            return next(err)
         }
-        
+
         res.json({ message: 'User data deleted successfully...' });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        const err = new Error("Server Error !")
+        err.status = 500;
+        return next(err)
     }
 };
 
 
 // Logout function
-const logout = (req, res) => {
+const logout = (req, res, next) => {
     try {
         // Clear the token cookie on the client side
         res.clearCookie('token');
-        
+
         // Send a response indicating successful logout
         res.status(200).json({ message: 'Logout successful' });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ message: 'Server error during logout' });
+        const err = new Error("Server Error !")
+        err.status = 500;
+        return next(err)
     }
 };
 

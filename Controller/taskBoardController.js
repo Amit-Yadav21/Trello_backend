@@ -17,7 +17,9 @@ const findTasksByStatus = async (req, res) => {
         res.status(200).json({ message: "Tasks grouped by status fetched successfully", tasks: groupedTasks });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to fetch tasks by status" });
+        const err = new Error("Server Error !")
+        err.status = 500;
+        return next(err)
     }
 };
 

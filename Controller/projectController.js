@@ -1,37 +1,45 @@
 import { Project } from '../Models/projectSchema.js';
 
 // Get All Projects
-const getAllProjects = async (req, res) => {
+const getAllProjects = async (req, res, next) => {
   try {
     const projects = await Project.find({});
     res.status(200).json({ message: "find all Project successfully.", project: projects });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const err = new Error("Server Error !")
+    err.status = 500;
+    return next(err)
   }
 };
 
 // Get Logged-in User's Projects
-const getProjects = async (req, res) => {
+const getProjects = async (req, res, next) => {
   try {
     const projects = await Project.find({ user: req.user.email });
     res.status(200).json({ message: "Project find successfully.", project: projects });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const err = new Error("Server Error !")
+    err.status = 500;
+    return next(err)
   }
 };
 
 // Create a New Project for Logged-in User
-const createProject = async (req, res) => {
+const createProject = async (req, res, next) => {
   const { projectName, description } = req.body;
   const { email } = req.user;
 
   if (!projectName || !description) {
-    return res.status(400).json({ message: 'project Name, description are required' });
+    const err = new Error("project Name, description are required")
+    err.status = 404;
+    return next(err)
   }
 
   const existingProject = await Project.findOne({ projectName, user: email });
   if (existingProject) {
-    return res.status(404).json({ message: "Project already exist..." });
+    const err = new Error("Project already exist...")
+    err.status = 400;
+    return next(err)
   }
 
   try {
@@ -44,19 +52,23 @@ const createProject = async (req, res) => {
     await project.save();
     res.status(200).json({ message: "Project ceated successfully.", project: project });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    const err = new Error("Server Error !")
+    err.status = 500;
+    return next(err)
   }
 };
 
 // Update Logged-in User's Project
-const updateProject = async (req, res) => {
+const updateProject = async (req, res, next) => {
   const { projectName, newName, description, status } = req.body;
   const { email } = req.user;
 
   try {
     const existingProject = await Project.findOne({ projectName, user: email });
     if (!existingProject) {
-      return res.status(404).json({ message: "Project not found" });
+      const err = new Error("Project not found for updation")
+      err.status = 404;
+      return next(err)
     }
 
     const updatedProject = await Project.findOneAndUpdate(
@@ -72,12 +84,14 @@ const updateProject = async (req, res) => {
     res.status(200).json({ message: "Project updated successfully.", updatedProject });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Something went wrong while updating the project." });
+    const err = new Error("Server Error !")
+    err.status = 500;
+    return next(err)
   }
 }
 
 // Change Status of Logged-in User's Project
-const changeProjectStatus = async (req, res) => {
+const changeProjectStatus = async (req, res, next) => {
   const { projectName, status } = req.body;
   const { email } = req.user;
 
@@ -85,7 +99,9 @@ const changeProjectStatus = async (req, res) => {
     // Check if the project exists
     const project = await Project.findOne({ projectName, user: email });
     if (!project) {
-      return res.status(404).json({ message: "Project not found" });
+      const err = new Error("Project not found for change project status")
+      err.status = 404;
+      return next(err)
     }
     // Update the project status
     project.status = status;
@@ -94,7 +110,9 @@ const changeProjectStatus = async (req, res) => {
     res.status(200).json({ message: "Project status updated successfully", project });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Something went wrong while canceling the projectStatus." });
+    const err = new Error("Server Error !")
+    err.status = 500;
+    return next(err)
   }
 };
 

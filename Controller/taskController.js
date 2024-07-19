@@ -1,7 +1,7 @@
 import { Task } from '../Models/taskSchema.js';
 import { Project } from '../Models/projectSchema.js';
 
-const createNewTask = async (req, res) => {
+const createNewTask = async (req, res, next) => {
     const { taskName, description, status, tags, dueDate, project } = req.body;
     const { email } = req.user;
 
@@ -9,13 +9,17 @@ const createNewTask = async (req, res) => {
         // Check if assigned user exists
         const taskExists = await Task.findOne({ taskName, project, assignedUser: req.user.email });
         if (taskExists) {
-            return res.status(400).json({ message: `Task already assigned this user :- ${email}` });
+            const err = new Error(`Task already assigned this user :- ${email}`)
+            err.status = 400;
+            return next(err)
         }
 
         // Check if project exists
         const projectExists = await Project.findOne({ name: project });
         if (!projectExists) {
-            return res.status(400).json({ error: "Project does not exist" });
+            const err = new Error("Project does not exist")
+            err.status = 404;
+            return next(err)
         }
 
         const newTask = new Task({
@@ -32,25 +36,31 @@ const createNewTask = async (req, res) => {
         res.status(200).json({ message: "Task created successfully", task: newTask });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to create task" });
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
-const findAllTask = async (req, res) => {
+const findAllTask = async (req, res, next) => {
     try {
         const tasks = await Task.find({});
         res.status(200).json({ message: "All Task find successfully", tasks });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to fetch tasks by email" });
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
-const findTaskByAssignedUser = async (req, res) => {
+const findTaskByAssignedUser = async (req, res, next) => {
     try {
         const tasks = await Task.find({ assignedUser: req.user.email });
         if (!tasks || tasks.length === 0) {
-            return res.status(401).json({ message: "No tasks found for the assigned user" });
+            const err = new Error("No tasks found for the assigned user")
+            err.status = 404;
+            return next(err)
         }
 
         const groupedTasks = {
@@ -68,23 +78,29 @@ const findTaskByAssignedUser = async (req, res) => {
 
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Something went wrong while fetching the tasks" });
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
-const updateTaskByProjectName = async (req, res) => {
+const updateTaskByProjectName = async (req, res, next) => {
     const { taskName, newName, description, status, tags, project } = req.body;
     const { email } = req.user;
 
     try {
         const checkTasks = await Task.find({ project, assignedUser: email });
         if (!checkTasks || checkTasks.length === 0) {
-            return res.status(404).json({ error: "Project and assigned user not available." });
+            const err = new Error("Project and assigned user not available.")
+            err.status = 404;
+            return next(err)
         }
 
         const task = await Task.findOne({ project, assignedUser: email });
         if (task) {
-            return res.status(200).json({ message: `Project name and assignedUser :- ${email}, already Exist...` });
+            const err = new Error(`Project name and assignedUser :- ${email}, already Exist...`)
+            err.status = 400;
+            return next(err)
         }
 
         const updatedTask = await Task.findOneAndUpdate(
@@ -102,23 +118,29 @@ const updateTaskByProjectName = async (req, res) => {
         res.status(200).json({ message: "Task updated successfully", task: updatedTask });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to update task" });
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
-const deleteTaskByProjectName = async (req, res) => {
+const deleteTaskByProjectName = async (req, res, next) => {
     const { project } = req.body;
 
     try {
         const deletedTask = await Task.findOneAndDelete({ project: project });
 
         if (!deletedTask || deletedTask.length === 0) {
-            return res.status(404).json({ message: "No tasks found to delete" });
+            const err = new Error("No tasks found to delete")
+            err.status = 500;
+            return next(err)
         }
         res.status(200).json({ message: "Tasks deleted successfully" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Failed to delete tasks" });
+        const err = new Error("Server Error")
+        err.status = 500;
+        return next(err)
     }
 };
 
